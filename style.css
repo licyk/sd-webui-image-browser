@@ -1,0 +1,5 @@
+#hanaikada-panel { width: 100%; }
+#hanaikada-panel .hanaikada-status { margin: 0.6rem 0; font-size: 0.9rem; }
+#hanaikada-panel .hanaikada-status[hidden] { display: none; }
+#hanaikada-panel .hanaikada-frame { width: 100%; height: max(600px, 78vh); border: 1px solid var(--border-color-primary, #888); border-radius: 0.5rem; background: var(--body-background-fill, #fff); }
+#hanaikada-panel .hanaikada-frame[hidden] { display: none; }
