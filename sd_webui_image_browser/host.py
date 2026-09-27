@@ -184,4 +184,4 @@ def on_ui_tabs(resources_getter=None):
         )
         if resources_getter is not None:
             build(resources_getter)
-    return [(tab, "Hanaikada", "hanaikada")]
+    return [(tab, "Image Browser", "hanaikada")]
