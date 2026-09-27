@@ -168,8 +168,12 @@ def on_ui_settings():
     )
 
 
-def on_ui_tabs():
+def on_ui_tabs(resources_getter=None):
+    """The Hanaikada tab. ``resources_getter`` returns the running ``Resources`` (or None); with it,
+    the tab also carries the hidden parts of "Send to txt2img / img2img / inpaint / extras"."""
     import gradio as gr
+
+    from sd_webui_image_browser.send import build
 
     with gr.Blocks(analytics_enabled=False) as tab:
         gr.HTML(
@@ -178,4 +182,6 @@ def on_ui_tabs():
   <iframe title="Hanaikada 图片浏览和管理" class="hanaikada-frame" hidden></iframe>
 </div>"""
         )
+        if resources_getter is not None:
+            build(resources_getter)
     return [(tab, "Hanaikada", "hanaikada")]

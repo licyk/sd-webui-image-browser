@@ -40,7 +40,7 @@ A1111 pins FastAPI 0.94, which cannot read the `Annotated` parameters Hanaikada'
 
 The tab shows the Hanaikada interface directly, without an extra toolbar or connection message. Error messages appear only when the connection fails, the login expires, or the frontend assets are missing.
 
-Hanaikada has no "send to txt2img / img2img" feature; copy parameters from its information panel instead.
+**Send to txt2img / img2img / inpaint / Extras** (in an image's menu or the viewer's Send button) works like the WebUI's own "Send to" buttons: the WebUI fills every field from the image's parameters, sets the image and its size, and switches to the tab. A WebUI image sends its own parameters exactly as written; a ComfyUI or InvokeAI image sends parameters rebuilt from its metadata; an image without parameters sends only the image, so the previous generation's parameters are never pasted by mistake. txt2img needs parameters; Extras takes only the image. This needs Hanaikada 0.1.3 or newer; with an older one the entries do not appear.
 
 ## Image folders
 

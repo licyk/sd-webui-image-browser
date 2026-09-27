@@ -32,7 +32,14 @@ def on_unloaded():
 
 
 script_callbacks.on_ui_settings(on_ui_settings)
-script_callbacks.on_ui_tabs(on_ui_tabs)
+
+
+def resources():
+    """What Hanaikada is running with, once the browser has been opened."""
+    return _runtime.services if _runtime is not None and not _runtime.closed else None
+
+
+script_callbacks.on_ui_tabs(lambda: on_ui_tabs(resources))
 script_callbacks.on_app_started(on_app_started)
 script_callbacks.on_image_saved(on_image_saved)
 script_callbacks.on_script_unloaded(on_unloaded)
