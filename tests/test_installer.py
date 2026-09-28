@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from packaging.requirements import Requirement
-
 from sd_webui_image_browser import installer
+from sd_webui_image_browser.package_analyzer import dependency_categorizer
 
 INSTALLED = {"fastapi": "0.94.0", "pillow": "9.5.0", "websockets": "11.0.3", "h11": "0.12.0", "rich": "13.9.0"}
 DEPENDENCIES = ["fastapi", "pillow>=10", "websockets>=12", "python-socketio", "send2trash", "tomli; python_version < '3.0'", "ruff; extra == 'dev'", "rich"]
@@ -22,11 +21,8 @@ def run(tmp_path, monkeypatch, installed, *, skip_install=False):
             installed["hanaikada"] = "0.1.0"
 
     monkeypatch.setattr(installer, "_installed", lambda name: installed.get(name.lower()))
-    monkeypatch.setattr(
-        installer,
-        "_dependencies",
-        lambda name: [Requirement(d) for d in DEPENDENCIES if not Requirement(d).marker or Requirement(d).marker.evaluate({"extra": ""})],
-    )
+    # The metadata's markers and optional groups go through the real analyzer.
+    monkeypatch.setattr(dependency_categorizer, "requires", lambda name: DEPENDENCIES if name == "hanaikada" else None)
     monkeypatch.setattr(installer, "_pins", lambda exclude: [f"{n}=={v}" for n, v in installed.items() if n not in exclude])
     installer.install_requirements(requirements, run_pip, log=logs.append)
     return calls, logs, constraints

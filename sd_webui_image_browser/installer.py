@@ -10,25 +10,35 @@ Installed packages are never upgraded.
 """
 
 import importlib
+import re
 import tempfile
-from importlib.metadata import PackageNotFoundError, distributions, requires, version
+from importlib.metadata import PackageNotFoundError, distributions, version
 from pathlib import Path
 
-from packaging.requirements import InvalidRequirement, Requirement
-from packaging.utils import canonicalize_name
-from packaging.version import InvalidVersion, Version
+from .package_analyzer import (
+    ParsedPyWhlRequirement,
+    PyWhlVersionComparison,
+    check_version_constraint,
+    evaluate_marker,
+    get_categorized_dependencies,
+    get_parse_bindings,
+    normalize_package_name,
+    parse_requirement,
+)
 
 LABEL = "SD WebUI Image Browser"
 
 
-def _read(path: Path) -> list[Requirement]:
+def _parse(requirement: str) -> ParsedPyWhlRequirement:
+    return parse_requirement(requirement, get_parse_bindings())
+
+
+def _read(path: Path) -> list[str]:
     out = []
     for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#"):
-            requirement = Requirement(line)
-            if not requirement.marker or requirement.marker.evaluate():
-                out.append(requirement)
+        line = re.sub(r"(^|\s+)#.*$", "", line).strip()
+        if line and evaluate_marker(_parse(line).marker):
+            out.append(line)
     return out
 
 
@@ -39,17 +49,27 @@ def _installed(name: str) -> str | None:
         return None
 
 
-def _dependencies(name: str) -> list[Requirement]:
-    out = []
-    for line in requires(name) or ():
-        try:
-            requirement = Requirement(line)
-        except InvalidRequirement:
-            continue
-        # Evaluating with an empty extra drops the optional dependency groups.
-        if not requirement.marker or requirement.marker.evaluate({"extra": ""}):
-            out.append(requirement)
-    return out
+def _dependencies(name: str) -> list[str]:
+    # Optional dependency groups are kept apart, and markers are already evaluated.
+    return get_categorized_dependencies(name)["mandatory"]
+
+
+def _specifier(requirement: str) -> str:
+    specifier = _parse(requirement).specifier
+    return specifier if isinstance(specifier, str) else ",".join(op + ver for op, ver in specifier)
+
+
+def _satisfied(requirement: str, installed: str | None) -> bool:
+    if installed is None:
+        return False
+    specifier = _parse(requirement).specifier
+    if isinstance(specifier, str):
+        return True  # A URL requirement names no version.
+    cmp = PyWhlVersionComparison(installed)
+    try:
+        return all(check_version_constraint(installed, op, ver, cmp) for op, ver in specifier)
+    except ValueError:
+        return False  # The installed version is not PEP 440.
 
 
 def _pins(exclude: set[str]) -> list[str]:
@@ -58,12 +78,10 @@ def _pins(exclude: set[str]) -> list[str]:
     pins = []
     for dist in distributions():
         name = dist.metadata["Name"]
-        if not name or canonicalize_name(name) in seen:
+        if not name or normalize_package_name(name) in seen:
             continue
-        seen.add(canonicalize_name(name))
-        try:
-            Version(dist.version)
-        except InvalidVersion:
+        seen.add(normalize_package_name(name))
+        if not PyWhlVersionComparison.WHL_VERSION_PARSE_REGEX.match(dist.version):
             continue
         pins.append(f"{name}=={dist.version}")
     return pins
@@ -71,26 +89,28 @@ def _pins(exclude: set[str]) -> list[str]:
 
 def install_requirements(path: Path, run_pip, log=print) -> None:
     for requirement in _read(path):
-        installed = _installed(requirement.name)
-        if installed is not None and requirement.specifier.contains(installed, prereleases=True):
+        name = _parse(requirement).name
+        if _satisfied(requirement, _installed(name)):
             continue
         # The requirements file is shipped with the extension, not user input.
         run_pip(f'install --no-deps "{requirement}"', f"{LABEL}: {requirement}")
         importlib.invalidate_caches()
-        if _installed(requirement.name) is None:
+        if _installed(name) is None:
             continue  # --skip-install
         missing, older = [], []
-        for dependency in _dependencies(requirement.name):
-            current = _installed(dependency.name)
+        for dependency in _dependencies(name):
+            dependency_name = _parse(dependency).name
+            current = _installed(dependency_name)
             if current is None:
                 missing.append(dependency)
-            elif not dependency.specifier.contains(current, prereleases=True):
-                older.append(f"{dependency.name} {current} ({dependency.specifier})")
+            elif not _satisfied(dependency, current):
+                older.append(f"{dependency_name} {current} ({_specifier(dependency)})")
         if missing:
             with tempfile.TemporaryDirectory() as tmp:
                 constraints = Path(tmp) / "constraints.txt"
-                constraints.write_text("\n".join(_pins({canonicalize_name(r.name) for r in (requirement, *missing)})) + "\n", encoding="utf-8")
+                exclude = {normalize_package_name(_parse(r).name) for r in (requirement, *missing)}
+                constraints.write_text("\n".join(_pins(exclude)) + "\n", encoding="utf-8")
                 names = " ".join(f'"{r}"' for r in missing)
-                run_pip(f'install {names} -c "{constraints}"', f"{LABEL}: dependencies of {requirement.name}")
+                run_pip(f'install {names} -c "{constraints}"', f"{LABEL}: dependencies of {name}")
         if older:
-            log(f"{LABEL}: keeping the WebUI's installed {', '.join(older)} for {requirement.name}.")
+            log(f"{LABEL}: keeping the WebUI's installed {', '.join(older)} for {name}.")

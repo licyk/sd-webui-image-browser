@@ -19,9 +19,10 @@ _lock = threading.Lock()
 
 def needs_annotated_shim() -> bool:
     from fastapi import __version__
-    from packaging.version import Version
 
-    return Version(__version__) < Version("0.95")
+    from .package_analyzer import PyWhlVersionComparison
+
+    return PyWhlVersionComparison(__version__) < PyWhlVersionComparison("0.95")
 
 
 def _legacy_parameter(param: inspect.Parameter) -> inspect.Parameter:

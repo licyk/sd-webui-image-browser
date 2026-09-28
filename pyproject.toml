@@ -1,6 +1,8 @@
 [tool.ruff]
 line-length = 160
 target-version = "py310"
+# Copied verbatim from comfyui-image-browser; keep it identical so it can be re-synced.
+extend-exclude = ["sd_webui_image_browser/package_analyzer", "sd_webui_image_browser/logger.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
