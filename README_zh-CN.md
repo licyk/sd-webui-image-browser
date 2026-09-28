@@ -2,13 +2,13 @@
 
 [English](README.md) | 简体中文
 
-适用于 Stable Diffusion WebUI（A1111）和 Forge / Forge Neo 的图片浏览扩展，由 [Hanaikada](https://pypi.org/project/hanaikada/) 提供支持。
+适用于 Stable Diffusion WebUI（A1111）和 Forge / Forge Neo 的图片浏览扩展，由 [Hanaikada 花筏](https://github.com/licyk/Hanaikada) 驱动。
 
 扩展在 **Hanaikada** 标签页中嵌入 Hanaikada 原生界面：以虚拟化网格浏览 WebUI 的输出文件夹，查看图片的全部生成参数，按提示词、模型、LoRA、种子等搜索，为图片打标签，对比两张图片，查看统计，并移动、复制、重命名和删除文件。这些功能均由 Hanaikada 提供。
 
 ## 安装
 
-需要 Python 3.10 或更高版本。
+需要 Python 3.10 或更高版本，以及 [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.5 或更高版本（`hanaikada>=0.1.5`）。
 
 ### 方式一：通过 WebUI 安装
 

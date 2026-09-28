@@ -2,13 +2,13 @@
 
 English | [简体中文](README_zh-CN.md)
 
-An image browser for Stable Diffusion WebUI (A1111) and Forge / Forge Neo, powered by [Hanaikada](https://pypi.org/project/hanaikada/).
+An image browser for Stable Diffusion WebUI (A1111) and Forge / Forge Neo, powered by [Hanaikada](https://github.com/licyk/Hanaikada).
 
 The extension embeds the native Hanaikada interface in the **Hanaikada** tab. It browses the WebUI's output folders in a virtualised grid, shows every generation parameter of an image, searches by prompt, model, LoRA, seed and more, tags images, compares two images, shows statistics, and moves, copies, renames and deletes files. These features are provided by Hanaikada.
 
 ## Installation
 
-Requires Python 3.10 or newer.
+Requires Python 3.10 or newer and [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.5 or newer (`hanaikada>=0.1.5`).
 
 ### Option 1: Install through WebUI
 
