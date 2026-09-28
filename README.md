@@ -8,7 +8,7 @@ The extension embeds the native Hanaikada interface in the **Hanaikada** tab. It
 
 ## Installation
 
-Requires Python 3.10 or newer and [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.5 or newer (`hanaikada>=0.1.5`).
+Requires Python 3.10 or newer and [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.6 or newer (`hanaikada>=0.1.6`).
 
 ### Option 1: Install through WebUI
 

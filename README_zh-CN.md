@@ -8,7 +8,7 @@
 
 ## 安装
 
-需要 Python 3.10 或更高版本，以及 [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.5 或更高版本（`hanaikada>=0.1.5`）。
+需要 Python 3.10 或更高版本，以及 [Hanaikada](https://pypi.org/project/hanaikada/) 0.1.6 或更高版本（`hanaikada>=0.1.6`）。
 
 ### 方式一：通过 WebUI 安装
 
