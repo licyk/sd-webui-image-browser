@@ -31,7 +31,7 @@ def test_tab_has_no_toolbar_and_hides_normal_status(monkeypatch):
 
     monkeypatch.setitem(sys.modules, "gradio", SimpleNamespace(Blocks=Blocks, HTML=html.append))
     tabs = on_ui_tabs()
-    assert tabs[0][1:] == ("Hanaikada", "hanaikada")
+    assert tabs[0][1:] == ("Image Browser", "hanaikada")
     elements = Elements()
     elements.feed(html[0])
     assert not any(tag in {"button", "a", "details"} for tag, _ in elements.items)
