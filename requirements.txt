@@ -1,2 +1,2 @@
-hanaikada>=0.1.6
+hanaikada>=0.1.7
 starlette
