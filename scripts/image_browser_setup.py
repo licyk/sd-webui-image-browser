@@ -4,7 +4,7 @@ import logging
 
 from modules import paths_internal, script_callbacks, shared
 
-from sd_webui_image_browser.host import image_saved, mount_browser, on_ui_settings, on_ui_tabs
+from sd_webui_image_browser.host import access_urls, image_saved, mount_browser, on_ui_settings, on_ui_tabs
 
 _runtime = None
 
@@ -15,6 +15,9 @@ def on_app_started(demo, app):
         _runtime = mount_browser(demo, app, shared, paths_internal)
     except Exception:
         logging.getLogger(__name__).exception("Could not mount Hanaikada")
+        return
+    for url in access_urls(demo, shared):
+        print(f"SD WebUI Image Browser: {url}")
 
 
 def on_image_saved(params):

@@ -47,6 +47,34 @@ class Resources:
         self.services.close()
 
 
+def bound_address(demo, cmd):
+    host = getattr(cmd, "server_name", None) or ("0.0.0.0" if getattr(cmd, "listen", False) or getattr(cmd, "share", False) else "127.0.0.1")
+    port = getattr(demo, "server_port", None) or getattr(cmd, "port", None) or 7860
+    return host, port
+
+
+def access_urls(demo, shared) -> list[str]:
+    """Addresses that open Hanaikada on its own page, for the start-up log.
+
+    ``--subpath`` only tells Gradio the prefix a reverse proxy strips, so the direct address has no
+    prefix; the proxy's address is the ``hanaikada_public_url`` setting.
+    """
+    host, port = bound_address(demo, shared.cmd_opts)
+    if host in ("0.0.0.0", "::"):
+        host = "127.0.0.1"
+    elif ":" in host:
+        host = f"[{host}]"
+    urls = [f"http://{host}:{port}{MOUNT_PATH}/"]
+    # The share tunnel forwards to the server root.
+    share_url = getattr(demo, "share_url", None)
+    if share_url:
+        urls.append(f"{share_url.rstrip('/')}{MOUNT_PATH}/")
+    public_url = (shared.opts.data.get("hanaikada_public_url") or "").strip()
+    if public_url:
+        urls.append(f"{public_url.rstrip('/')}/")
+    return urls
+
+
 def create_factory(shared, paths, demo, loaded=None):
     loaded = sys.modules if loaded is None else loaded
 
@@ -59,10 +87,8 @@ def create_factory(shared, paths, demo, loaded=None):
         from hanaikada.core.context import build_services
         from hanaikada.version import VERSION as HANAIKADA_VERSION
 
-        cmd = shared.cmd_opts
         public_url = validate_public_base_url(shared.opts.data.get("hanaikada_public_url") or None)
-        bound_host = getattr(cmd, "server_name", None) or ("0.0.0.0" if getattr(cmd, "listen", False) or getattr(cmd, "share", False) else "127.0.0.1")
-        port = getattr(demo, "server_port", None) or getattr(cmd, "port", None) or 7860
+        bound_host, port = bound_address(demo, shared.cmd_opts)
         extra_hosts = {urlsplit(public_url).hostname} if public_url else set()
         host = "Forge" if is_forge(loaded) else "A1111"
         roots = collect_roots(shared, paths, "Forge" if host == "Forge" else "Stable Diffusion WebUI")
